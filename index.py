@@ -11,7 +11,7 @@ df = pd.concat([wd, ep], axis=1)
 df = df.drop(columns="DATE")
 
 # '日', '休日', '現地気圧', '海面気圧', '降水量', '平均気温', '最高気温', '最低気温', '平均湿度',
-# '最小湿度', '平均風速', '最大風速', '最大瞬間風速', '日照時間', 'DATE', 'ピーク時供給力(万kW)',
+# '最小湿度', '平均風速', '最大風速', '最大瞬間風速', '日照時間', 'ピーク時供給力(万kW)',
 # '予想最大電力(万kW)', '予想使用率(%)', '実績最大電力(万kW)', '実績最大電力発生時間帯'
 
 col = [
@@ -35,15 +35,3 @@ df = df.replace("6.2 )", "6.2")
 df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
 print(df.info())
 df.head()
-
-# %%
-X = df.iloc[:, 2:14].values  # 説明変数
-y_col_name = "Actual maximum power[10^5kW]"
-y = df.loc[:, [y_col_name]].values  # 目的変数
-
-# 説明変数、目的変数を標準化
-ss = StandardScaler()
-X_std = ss.fit_transform(X)
-y_std = ss.fit_transform(y)
-
-# %%

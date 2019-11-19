@@ -14,7 +14,7 @@ df = pd.concat([wd, ep], axis=1)
 df = df.drop(columns="DATE")
 
 # '日', '休日', '現地気圧', '海面気圧', '降水量', '平均気温', '最高気温', '最低気温', '平均湿度',
-# '最小湿度', '平均風速', '最大風速', '最大瞬間風速', '日照時間', 'DATE', 'ピーク時供給力(万kW)',
+# '最小湿度', '平均風速', '最大風速', '最大瞬間風速', '日照時間', 'ピーク時供給力(万kW)',
 # '予想最大電力(万kW)', '予想使用率(%)', '実績最大電力(万kW)', '実績最大電力発生時間帯'
 
 col = [
@@ -57,9 +57,9 @@ def regression(x_name, y_name="Actual maximum power[10^5kW]"):
     # 学習
     lr = LinearRegression()  # linear 次元1
     lr.fit(X, y)
-    lr_quad = LinearRegression()  # linear 次元2
+    lr_quad = LinearRegression()  # quad 次元2
     lr_quad.fit(X_quad, y)
-    # lr_cubic = LinearRegression()  # linear 次元3
+    # lr_cubic = LinearRegression()  # cubic 次元3
     # lr_cubic.fit(X_cubic, y)
 
     # プロット
@@ -74,7 +74,7 @@ def regression(x_name, y_name="Actual maximum power[10^5kW]"):
 
 
 # %%
-# 単回帰分析を実行
+# 単回帰分析を実行 y="Actual maximum power[10^5kW]" 実績最大電力(万kW)
 for x in ["Local pressure", "Sea level pressure",
           "Average temperature", "Highest temperature",
           "Lowest Temperature", "Average humidity",
@@ -82,6 +82,39 @@ for x in ["Local pressure", "Sea level pressure",
           "Maximum wind speed", "Maximum instantaneous wind speed",
           "Sunshine hours"]:
     regression(x_name=x)
+
+
+# %%
+# 単回帰分析を実行 y="Peak supply capacity[10^5kW]" ピーク時供給力(万kW)
+for x in ["Local pressure", "Sea level pressure",
+          "Average temperature", "Highest temperature",
+          "Lowest Temperature", "Average humidity",
+          "Minimum humidity", "Average wind speed",
+          "Maximum wind speed", "Maximum instantaneous wind speed",
+          "Sunshine hours"]:
+    regression(x_name=x, y_name="Peak supply capacity[10^5kW]")
+
+
+# %%
+# 単回帰分析を実行 y="Expected maximum power[10^5kW]" 予想最大電力(万kW)
+for x in ["Local pressure", "Sea level pressure",
+          "Average temperature", "Highest temperature",
+          "Lowest Temperature", "Average humidity",
+          "Minimum humidity", "Average wind speed",
+          "Maximum wind speed", "Maximum instantaneous wind speed",
+          "Sunshine hours"]:
+    regression(x_name=x, y_name="Expected maximum power[10^5kW]")
+
+
+# %%
+# 単回帰分析を実行 y="Expected usage[%]" 予想使用率(%)
+for x in ["Local pressure", "Sea level pressure",
+          "Average temperature", "Highest temperature",
+          "Lowest Temperature", "Average humidity",
+          "Minimum humidity", "Average wind speed",
+          "Maximum wind speed", "Maximum instantaneous wind speed",
+          "Sunshine hours"]:
+    regression(x_name=x, y_name="Expected usage[%]")
 
 
 # %%
