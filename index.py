@@ -37,8 +37,9 @@ print(df.info())
 df.head()
 
 # %%
-X = df.iloc[:, 2:14].values
-y = df.loc[:, ["Actual maximum power[10^5kW]"]].values
+X = df.iloc[:, 2:14].values  # 説明変数
+y_col_name = "Actual maximum power[10^5kW]"
+y = df.loc[:, [y_col_name]].values  # 目的変数
 
 # 説明変数、目的変数を標準化
 ss = StandardScaler()
