@@ -1,8 +1,11 @@
 # %%
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures
 
 # %%
 ep = pd.read_csv("data/ele_power_data.csv")
@@ -38,30 +41,47 @@ df.head()
 
 
 # %%
-X = df.iloc[:, [2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]].values  # 説明変数
-y_col_name = "Actual maximum power[10^5kW]"
-y = df.loc[:, [y_col_name]].values  # 目的変数
+# 単回帰分析
+def regression(x_name, y_name="Actual maximum power[10^5kW]"):
+    x_col_name = x_name
+    X = df.loc[:, [x_col_name]].values  # 説明変数
+    y_col_name = y_name
+    y = df.loc[:, [y_col_name]].values  # 目的変数
 
-# 説明変数、目的変数を標準化
-ss = StandardScaler()
-X_std = ss.fit_transform(X)
-y_std = ss.fit_transform(y)
-y_std = y_std.reshape(-1)
+    # 変数変換
+    quad = PolynomialFeatures(degree=2)
+    X_quad = quad.fit_transform(X)
+    # cubic = PolynomialFeatures(degree=3)
+    # X_cubic = cubic.fit_transform(X)
+
+    # 学習
+    lr = LinearRegression()  # linear 次元1
+    lr.fit(X, y)
+    lr_quad = LinearRegression()  # linear 次元2
+    lr_quad.fit(X_quad, y)
+    # lr_cubic = LinearRegression()  # linear 次元3
+    # lr_cubic.fit(X_cubic, y)
+
+    # プロット
+    plt.scatter(X, y, color="gray", label="data")
+    plt.plot(X, lr.predict(X), color="red", label="linear")
+    plt.plot(X, lr_quad.predict(X_quad), color="blue", label="quad")
+    # plt.plot(X, lr_cubic.predict(X_cubic), color="green", label="cubic")
+    plt.legend(loc="upper right")
+    plt.xlabel(x_col_name)
+    plt.ylabel(y_col_name)
+    plt.show()
 
 
 # %%
-X_std_train, X_std_test, y_std_train, y_std_test = train_test_split(
-    X_std, y_std, test_size=0.3, random_state=0)
-
-
-# %%
-lr = LinearRegression()
-lr.fit(X_std_train, y_std_train)
-
-
-# %%
-print("trainデータに対するスコア: ", lr.score(X_std_train, y_std_train))
-print("testデータに対するスコア: ", lr.score(X_std_test, y_std_test))
+# 単回帰分析を実行
+for x in ["Local pressure", "Sea level pressure",
+          "Average temperature", "Highest temperature",
+          "Lowest Temperature", "Average humidity",
+          "Minimum humidity", "Average wind speed",
+          "Maximum wind speed", "Maximum instantaneous wind speed",
+          "Sunshine hours"]:
+    regression(x_name=x)
 
 
 # %%
