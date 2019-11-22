@@ -58,6 +58,36 @@ def build_model():
         metrics=['mae', 'mse'])
     return model
 
+def norm(x, train_stats):
+    return (x - train_stats['mean']) / train_stats['std']
+
+def plot_history(history):
+    hist = pd.DataFrame(history.history)
+    hist['epoch'] = history.epoch
+
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Abs Error of PSC[10^5kW]')
+    plt.plot(hist['epoch'], hist['mean_absolute_error'],
+            label='Train Error')
+    plt.plot(hist['epoch'], hist['val_mean_absolute_error'],
+            label = 'Val Error')
+    plt.ylim([0,100])
+    plt.title('MAE(Mean Absolute Error)')
+    plt.legend()
+
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Square Error of PSC[10^5kW]')
+    plt.plot(hist['epoch'], hist['mean_squared_error'],
+            label='Train Error')
+    plt.plot(hist['epoch'], hist['val_mean_squared_error'],
+            label = 'Val Error')
+    plt.ylim([0,10000])
+    plt.title('MSE(Mean Squared Error)')
+    plt.legend()
+    plt.show()
+
 if __name__ == '__main__':
     dataset = read_dataset()
     date = dataset.pop('Date')
@@ -66,19 +96,36 @@ if __name__ == '__main__':
     train_dataset = dataset.sample(frac=0.8,random_state=0)
     test_dataset = dataset.drop(train_dataset.index)
 
-    '''
-    sns.pairplot(train_dataset[["Average temperature", "Peak supply capacity[10^5kW]", "Local pressure"]], diag_kind="kde")
-    plt.show()
-    '''
+    train_stats = train_dataset.describe()
+    train_stats.pop("Peak supply capacity[10^5kW]")
+    train_stats = train_stats.transpose()
 
     # ラベルと特徴量の分離
     train_labels = train_dataset.pop('Peak supply capacity[10^5kW]')
     test_labels = test_dataset.pop('Peak supply capacity[10^5kW]')
 
+    # データの正規化
+    normed_train_data = norm(train_dataset, train_stats)
+    normed_test_data = norm(test_dataset, train_stats)
+
+    # モデル作成
     model = build_model()
 
-    example_batch = train_dataset[:10]
-    example_result = model.predict(example_batch)
-    print(example_result)
+    # 学習を行う
+    history = model.fit(normed_train_data, train_labels, epochs=1000, validation_split=0.2, verbose=0)
+    plot_history(history)
+
+    # テストデータから最大使用電力を計算
+    test_predictions = model.predict(normed_test_data).flatten()
+    plt.scatter(test_labels, test_predictions)
+    plt.xlabel('True Values of PSC[10^5kW]')
+    plt.ylabel('Predictions of PSC[10^5kW]')
+    plt.axis('equal')
+    plt.axis('square')
+    plt.xlim([0,plt.xlim()[1]])
+    plt.ylim([0,plt.ylim()[1]])
+    plt.plot([0, 2000], [0, 2000])
+    plt.title('Prediction')
+    plt.show()
 
     print('finish')
