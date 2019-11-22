@@ -115,7 +115,7 @@ if __name__ == '__main__':
     history = model.fit(normed_train_data, train_labels, epochs=1000, validation_split=0.2, verbose=0)
     plot_history(history)
 
-    # テストデータから最大使用電力を計算
+    # テストデータから最大使用電力を予測
     test_predictions = model.predict(normed_test_data).flatten()
     plt.scatter(test_labels, test_predictions)
     plt.xlabel('True Values of PSC[10^5kW]')
